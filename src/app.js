@@ -1,7 +1,16 @@
 import {api as sonarqubeApi} from "./sonarqube/api"
 import {api as gitApi} from "./scm/api"
+import {dbClient} from "./mongodb/database"
+import {services as scmServices} from "./scm/services"
 
-const projectKey = "vscode";
+const projectKey = "microsoft/vscode";
+const src = "/home/noman637/Projects/Research/software-metrics-systematic-study/case-studies/vscode/code";
+const branch = "main";
+
+// step 1: save commits
+await scmServices.saveCommits({projectKey, src, branch})
+// step 2: save commit messages
+
 // const test = await sonarqubeApi.getMeasures({projectKey})
 // const test = await sonarqubeApi.getIssues({projectKey, newCode: false})
 // console.log(test.issues[50])
@@ -26,3 +35,4 @@ const projectKey = "vscode";
 //         console.log("end")
 //     }
 // })
+await dbClient.close()
