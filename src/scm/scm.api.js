@@ -29,17 +29,26 @@ const getCommitMessages = async ({src, branch}) => {
     })
 }
 
+const getCommitIdOfTag = ({src, tag}) => {
+    const cmd = `git -C ${src} rev-list -n 1 ${tag}`
+    // return runCommand({cmd}).toString().trim()
+    const output = runCommand({
+        cmd,
+        options: {
+            stdio: "pipe"
+        }
+    })
+    return output.toString().trim()
+}
+
 const createCSVFileStream = ({cmd, output, parseOptions = {}}) => {
-    try {
-        runCommand({cmd})
-        return fs.createReadStream(output)
-            .pipe(parse(parseOptions))
-    } catch (err) {
-        console.error(err)
-    }
+    runCommand({cmd})
+    return fs.createReadStream(output)
+        .pipe(parse(parseOptions))
 }
 
 export const api = {
     getCommits,
-    getCommitMessages
+    getCommitMessages,
+    getCommitIdOfTag
 }

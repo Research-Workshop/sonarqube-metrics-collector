@@ -1,4 +1,4 @@
-import {api as mongoApi} from "../mongodb/mongo.api";
+import {operations} from "./scm.operation";
 import {api} from "./scm.api";
 import {processStreamInBatch} from "../util/stream";
 
@@ -18,7 +18,7 @@ const createCommits = async ({project, src, branch = "main"}) => {
             order: order++,
         }),
         processBatch: async (batch) => {
-            await mongoApi.createCommits({commits: batch})
+            await operations.createCommits({commits: batch})
         }
     })
 }
@@ -40,7 +40,7 @@ const updateCommitMessages = async ({projectKey, src, branch = "main"}) => {
             tagged_issues: `${subject} ${body}`.match(issueRegex)?.map(issue => Number(issue.replace("#", ""))) ?? []
         }),
         processBatch: async (batch) => {
-            await mongoApi.updateCommitMessagesWithIssueTags(batch)
+            await operations.updateCommitMessagesWithIssueTags(batch)
         }
     })
 }

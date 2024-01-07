@@ -2,11 +2,12 @@ import axios from "axios";
 import {GLOBALS} from "../globals";
 import {constants} from "./sonarqube.constants"
 import {runCommand} from "../util/command";
+import qs from "qs";
 
-const runAnalysis = ({project, src, tag, ext}) => {
+const runAnalysis = ({projectKey, src, version, ext}) => {
     // bpt sonarqube_analysis -src= -tag=1.33.0 -key=vscode -url=http://localhost:9000 -token=squ_b30f63460de86ab5cbe68cd3ef25898c4c7c416b -ext=/extensions/sonarqube_analysis-generic.sh
-    const cmd = `bpt sonarqube_analysis -src=${src} -tag=${tag} -key=${project} -url=${GLOBALS.SONARQUBE_URL} -token=${GLOBALS.SONARQUBE_TOKEN} -ext=${ext}`
-    runCommand({cmd, exitOnError: true})
+    const cmd = `bpt sonarqube_analysis -src=${src} -version=${version} -key=${projectKey} -url=${GLOBALS.SONARQUBE_URL} -token=${GLOBALS.SONARQUBE_TOKEN} -ext=${ext}`
+    runCommand({cmd})
 }
 
 /* ======================== WEB APIs ======================== */
@@ -17,6 +18,24 @@ const client = axios.create({
     },
     maxBodyLength: Infinity
 });
+
+const createProject = async ({projectKey, branch}) => {
+    let data = qs.stringify({
+        project: projectKey,
+        name: projectKey,
+        branch
+    });
+
+    await client.post('/projects/create', data, {
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    });
+}
+
+const deleteProject = async ({projectKey}) => {
+    await client.post(`/projects/delete?project=${projectKey}`);
+}
 
 const getQualityGateStatus = async ({projectKey}) => {
     const res = await client.get(`/qualitygates/project_status?projectKey=${projectKey}`)
@@ -64,6 +83,8 @@ const getSecurityHotspots = async ({projectKey, newCode = true, page = 1, pageSi
 
 export const api = {
     runAnalysis,
+    createProject,
+    deleteProject,
     getQualityGateStatus,
     getMeasures,
     getIssues,

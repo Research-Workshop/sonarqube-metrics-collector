@@ -1,4 +1,12 @@
-export const processStreamInBatch = async ({stream, batchSize = 500, transformItem, processBatch}) => {
+export const processStreamInBatch = async ({
+                                               stream,
+                                               batchSize = 500,
+                                               transformItem,
+                                               processBatch,
+                                               onError = async ({err}) => {
+                                                   console.log(err)
+                                               }
+                                           }) => {
     let batch = [];
     let i = 0;
     for await (const data of stream) {
@@ -12,7 +20,7 @@ export const processStreamInBatch = async ({stream, batchSize = 500, transformIt
             await processBatch(batch);
             i += batchSize;
         } catch (err) {
-            console.error(err)
+            await onError({err, batch})
         }
 
         console.log(`finished processing ${i} items`)
@@ -28,6 +36,6 @@ export const processStreamInBatch = async ({stream, batchSize = 500, transformIt
         i += batch.length;
         console.log(`finished processing ${i} items`)
     } catch (err) {
-        console.error(err)
+        await onError({err, batch})
     }
 }
