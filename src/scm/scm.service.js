@@ -23,7 +23,7 @@ const createCommits = async ({project, src, branch = "main"}) => {
     })
 }
 
-const updateCommitMessages = async ({projectKey, src, branch = "main"}) => {
+const updateCommitMessages = async ({src, branch = "main"}) => {
 
     const commitMessageStream = await api.getCommitMessages({src, branch})
 
