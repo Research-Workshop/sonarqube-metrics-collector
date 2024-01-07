@@ -48,6 +48,8 @@ const tasks = [
     // }),
     // step 3c: store all analysis metrics
     // () => sonarqubeServices.createMeasures({project, projectKey, version}),
+    // () => sonarqubeServices.createFacets({project, projectKey, version}),
+    // () => sonarqubeServices.createIssues({project, projectKey, version}),
 ];
 
 for (const task of tasks) {

@@ -10,6 +10,20 @@ async function createMeasures({project, version, measures}) {
     });
 }
 
+async function createFacetProperties({facetProperties}) {
+    const db = GLOBALS.DB_CLIENT.db("metrics");
+    const commitsCollection = db.collection("facets");
+    await commitsCollection.insertMany(facetProperties);
+}
+
+async function createIssues({issues}) {
+    const db = GLOBALS.DB_CLIENT.db("metrics");
+    const commitsCollection = db.collection("issues");
+    await commitsCollection.insertMany(issues);
+}
+
 export const operations = {
-    createMeasures
+    createMeasures,
+    createFacetProperties,
+    createIssues
 }

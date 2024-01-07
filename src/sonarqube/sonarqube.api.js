@@ -1,8 +1,11 @@
 import axios from "axios";
-import {GLOBALS} from "../globals";
-import {constants} from "./sonarqube.constants"
-import {runCommand} from "../util/command";
 import qs from "qs";
+import {Readable} from "stream";
+
+import {GLOBALS} from "../globals";
+import {runCommand} from "../util/command";
+
+import {constants} from "./sonarqube.constants"
 
 const runAnalysis = ({projectKey, src, version, ext}) => {
     // bpt sonarqube_analysis -src= -tag=1.33.0 -key=vscode -url=http://localhost:9000 -token=squ_b30f63460de86ab5cbe68cd3ef25898c4c7c416b -ext=/extensions/sonarqube_analysis-generic.sh
@@ -51,23 +54,37 @@ const getMeasures = async ({projectKey}) => {
     })
     return res.data.component.measures
 }
-
-const getIssues = async ({projectKey, newCode = true, page = 1, pageSize = 500}) => {
+const getFacets = async ({projectKey, newCode = false}) => {
     const params = {
         componentKeys: projectKey,
-        p: page,
-        ps: pageSize,
         facets: constants.ALL_ISSUE_FACETS,
+        ps: 1
     }
     if (newCode) {
         params.inNewCodePeriod = true
     }
     const res = await client.get("/issues/search", {params})
-    const {facets, paging, issues} = res.data
-    return {facets, paging, issues}
+    const {facets} = res.data
+    return facets
 }
 
-const getSecurityHotspots = async ({projectKey, newCode = true, page = 1, pageSize = 500}) => {
+const getIssues = async ({projectKey, newCode = false, page = 1, pageSize = 500}) => {
+    const params = {
+        componentKeys: projectKey,
+        p: page,
+        ps: pageSize,
+    }
+    if (newCode) {
+        params.inNewCodePeriod = true
+    }
+    return await createPaginatedStream({
+        url: "/issues/search",
+        method: "get",
+        params,
+    })
+}
+
+const getSecurityHotspots = async ({projectKey, newCode = false, page = 1, pageSize = 500}) => {
     const params = {
         projectKey,
         p: page,
@@ -76,9 +93,73 @@ const getSecurityHotspots = async ({projectKey, newCode = true, page = 1, pageSi
     if (newCode) {
         params.inNewCodePeriod = true
     }
-    const res = await client.get("/hotspots/search", {params})
-    const {paging, hotspots} = res.data
-    return {paging, hotspots}
+    // const res = await client.get("/hotspots/search", {params})
+    // const {paging, hotspots} = res.data
+    // return {paging, hotspots}
+    return await createPaginatedStream({
+        url: "/hotspots/search",
+        method: "get",
+        params
+    })
+}
+
+const createPaginatedStream = async ({url, method, data, params}) => {
+    async function* fetchData() {
+        const response = await client.request({
+            url,
+            method,
+            data,
+            params,
+        })
+        const {paging, ...rest} = response.data
+        yield rest
+
+        const currentPage = paging.pageIndex
+        const totalPages = Math.ceil(paging.total / paging.pageSize)
+        for (let i = currentPage + 1; i <= totalPages; i++) {
+            const response = await client.request({
+                url,
+                method,
+                data,
+                params: {
+                    ...params,
+                    p: i
+                }
+            })
+            const {paging, ...rest} = response.data
+            yield rest
+        }
+    }
+
+    return new Readable.from(fetchData())
+    // const stream = new Readable({
+    //     objectMode: true,
+    //     async read() {
+    //         const response = await client.request({
+    //             url,
+    //             method,
+    //             data,
+    //             params,
+    //         })
+    //         const {paging, ...rest} = response.data
+    //         const totalPages = Math.ceil(paging.total / paging.pageSize)
+    //         this.push(rest)
+    //         for (let i = 1; i <= totalPages; i++) {
+    //             const response = await client.request({
+    //                 url,
+    //                 method,
+    //                 data,
+    //                 params: {
+    //                     ...params,
+    //                     p: i
+    //                 }
+    //             })
+    //             const {paging, ...rest} = response.data
+    //             this.push(rest)
+    //         }
+    //         this.push(null)
+    //     }
+    // })
 }
 
 export const api = {
@@ -87,6 +168,7 @@ export const api = {
     deleteProject,
     getQualityGateStatus,
     getMeasures,
+    getFacets,
     getIssues,
     getSecurityHotspots
 }
