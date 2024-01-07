@@ -1,7 +1,15 @@
 import axios from "axios";
 import {GLOBALS} from "../globals";
-import {constants} from "./constants"
+import {constants} from "./sonarqube.constants"
+import {runCommand} from "../util/command";
 
+const runAnalysis = ({project, src, tag, ext}) => {
+    // bpt sonarqube_analysis -src= -tag=1.33.0 -key=vscode -url=http://localhost:9000 -token=squ_b30f63460de86ab5cbe68cd3ef25898c4c7c416b -ext=/extensions/sonarqube_analysis-generic.sh
+    const cmd = `bpt sonarqube_analysis -src=${src} -tag=${tag} -key=${project} -url=${GLOBALS.SONARQUBE_URL} -token=${GLOBALS.SONARQUBE_TOKEN} -ext=${ext}`
+    runCommand({cmd, exitOnError: true})
+}
+
+/* ======================== WEB APIs ======================== */
 const client = axios.create({
     baseURL: `${GLOBALS.SONARQUBE_URL}/api`,
     auth: {
@@ -55,6 +63,7 @@ const getSecurityHotspots = async ({projectKey, newCode = true, page = 1, pageSi
 }
 
 export const api = {
+    runAnalysis,
     getQualityGateStatus,
     getMeasures,
     getIssues,

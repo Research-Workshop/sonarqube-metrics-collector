@@ -1,18 +1,28 @@
-import {api as sonarqubeApi} from "./sonarqube/api"
-import {api as gitApi} from "./scm/api"
-import {closeDb, initializeDb} from "./mongodb/database"
-import {services as scmServices} from "./scm/services"
+import path from "path";
+import {api as sonarqubeApi} from "./sonarqube/sonarqube.api"
+import {api as gitApi} from "./scm/scm.api"
+import {closeDb, initializeDb} from "./mongodb/mongo.database"
+import {services as scmServices} from "./scm/scm.service"
 
-const project = "microsoft/vscode";
-const src = "/home/noman637/Projects/Research/software-metrics-systematic-study/case-studies/vscode/code";
+const project = "microsoft-vscode";
+const projectBaseDir = "/home/noman637/Projects/Research/software-metrics-systematic-study/case-studies/vscode";
+const src = path.join(projectBaseDir, "code");
+const scripts = path.join(projectBaseDir, "scripts");
 const branch = "main";
 
 await initializeDb()
 
 // step 1: create commits
-// await scmServices.createCommits({project, src, branch})
+await scmServices.createCommits({project, src, branch})
 // step 2: update commit messages
 await scmServices.updateCommitMessages({project, src, branch})
+// step 3: run sonarqube analysis
+// sonarqubeApi.runAnalysis({
+//     project,
+//     src,
+//     tag: "1.30.1",
+//     ext: path.join(scripts, "bpt-ext-sonarqube_analysis.sh")
+// })
 
 // const test = await sonarqubeApi.getMeasures({projectKey})
 // const test = await sonarqubeApi.getIssues({projectKey, newCode: false})
@@ -38,8 +48,4 @@ await scmServices.updateCommitMessages({project, src, branch})
 //         console.log("end")
 //     }
 // })
-console.log("done")
-// sleep for 5 seconds
-// await new Promise(resolve => setTimeout(resolve, 5000))
 await closeDb(false)
-console.log("closed db")

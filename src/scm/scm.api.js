@@ -1,9 +1,9 @@
-import {execSync} from "child_process";
 import fs from "fs";
 import {parse} from 'csv-parse';
 
 import {GLOBALS} from "../globals";
 import {generateTraceId} from "../util/tracer";
+import {runCommand} from "../util/command";
 
 const getCommits = async ({src, branch}) => {
     const bpt = GLOBALS.BPT_PATH
@@ -30,9 +30,8 @@ const getCommitMessages = async ({src, branch}) => {
 }
 
 const createCSVFileStream = ({cmd, output, parseOptions = {}}) => {
-    // run the command with proper error handling
     try {
-        execSync(cmd, {stdio: "inherit"})
+        runCommand({cmd})
         return fs.createReadStream(output)
             .pipe(parse(parseOptions))
     } catch (err) {

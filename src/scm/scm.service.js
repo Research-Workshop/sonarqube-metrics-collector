@@ -1,5 +1,6 @@
-import {api as mongoApi} from "../mongodb/api";
-import {api} from "./api";
+import {api as mongoApi} from "../mongodb/mongo.api";
+import {api} from "./scm.api";
+import {processStreamInBatch} from "../util/stream";
 
 const createCommits = async ({project, src, branch = "main"}) => {
 
@@ -42,40 +43,6 @@ const updateCommitMessages = async ({projectKey, src, branch = "main"}) => {
             await mongoApi.updateCommitMessagesWithIssueTags(batch)
         }
     })
-}
-
-const processStreamInBatch = async ({stream, batchSize = 500, transformItem, processBatch}) => {
-    let batch = [];
-    let i = 0;
-    for await (const data of stream) {
-        batch.push(await transformItem(data))
-
-        if (batch.length !== batchSize) {
-            continue;
-        }
-
-        try {
-            await processBatch(batch);
-            i += batchSize;
-        } catch (err) {
-            console.error(err)
-        }
-
-        console.log(`finished processing ${i} items`)
-        batch = []
-    }
-
-    if (batch.length === 0) {
-        return
-    }
-
-    try {
-        await processBatch(batch);
-        i += batch.length;
-        console.log(`finished processing ${i} items`)
-    } catch (err) {
-        console.error(err)
-    }
 }
 
 export const services = {
