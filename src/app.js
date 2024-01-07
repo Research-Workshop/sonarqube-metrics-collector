@@ -1,15 +1,18 @@
 import {api as sonarqubeApi} from "./sonarqube/api"
 import {api as gitApi} from "./scm/api"
-import {dbClient} from "./mongodb/database"
+import {closeDb, initializeDb} from "./mongodb/database"
 import {services as scmServices} from "./scm/services"
 
-const projectKey = "microsoft/vscode";
+const project = "microsoft/vscode";
 const src = "/home/noman637/Projects/Research/software-metrics-systematic-study/case-studies/vscode/code";
 const branch = "main";
 
-// step 1: save commits
-await scmServices.saveCommits({projectKey, src, branch})
-// step 2: save commit messages
+await initializeDb()
+
+// step 1: create commits
+// await scmServices.createCommits({project, src, branch})
+// step 2: update commit messages
+await scmServices.updateCommitMessages({project, src, branch})
 
 // const test = await sonarqubeApi.getMeasures({projectKey})
 // const test = await sonarqubeApi.getIssues({projectKey, newCode: false})
@@ -35,4 +38,8 @@ await scmServices.saveCommits({projectKey, src, branch})
 //         console.log("end")
 //     }
 // })
-await dbClient.close()
+console.log("done")
+// sleep for 5 seconds
+// await new Promise(resolve => setTimeout(resolve, 5000))
+await closeDb(false)
+console.log("closed db")

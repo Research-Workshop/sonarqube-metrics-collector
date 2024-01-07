@@ -22,8 +22,9 @@ const getCommitMessages = async ({src, branch}) => {
     // run the command with proper error handling
     return createCSVFileStream({
         cmd, output, parseOptions: {
-            delimiter: "-=-=-=",
-            record_delimiter: "--=--=--=",
+            delimiter: "***===***",
+            record_delimiter: ":::===:::",
+            quote: false
         }
     })
 }
@@ -32,14 +33,8 @@ const createCSVFileStream = ({cmd, output, parseOptions = {}}) => {
     // run the command with proper error handling
     try {
         execSync(cmd, {stdio: "inherit"})
-        return (onEvents) => {
-            const pipeline = fs.createReadStream(output)
-                .pipe(parse(parseOptions))
-            Object.entries(onEvents).forEach(([event, handler]) => {
-                pipeline.on(event, handler)
-            })
-            return pipeline
-        }
+        return fs.createReadStream(output)
+            .pipe(parse(parseOptions))
     } catch (err) {
         console.error(err)
     }

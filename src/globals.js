@@ -3,4 +3,5 @@ export const GLOBALS = {
     SONARQUBE_TOKEN: process.env.SONARQUBE_TOKEN,
     BPT_PATH: process.env.BPT_PATH,
     MONGO_URL: process.env.MONGO_URL,
+    DB_CLIENT: null,
 }

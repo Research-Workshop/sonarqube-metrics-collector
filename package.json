@@ -26,6 +26,7 @@
   "dependencies": {
     "axios": "^1.6.5",
     "csv-parse": "^5.5.3",
+    "csv-parser": "^3.0.0",
     "migrate-mongo": "^11.0.0",
     "mongodb": "6.3",
     "qs": "^6.11.2",
