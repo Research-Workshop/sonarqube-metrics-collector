@@ -60,8 +60,44 @@ const createIssues = async ({project, projectKey, version}) => {
     }
 }
 
+const createSecurityHotspots = async ({project, projectKey, version}) => {
+    const hotspotsStream = await api.getSecurityHotspots({projectKey})
+    for await (const data of hotspotsStream) {
+        const {hotspots: hotspotsArr} = data
+        const hotspots = hotspotsArr.map(({
+                                              author,
+                                              component,
+                                              creationDate,
+                                              flows,
+                                              key,
+                                              line,
+                                              ruleKey: rule,
+                                              securityCategory,
+                                              status,
+                                              textRange,
+                                              vulnerabilityProbability,
+                                          }) => ({
+            _id: key,
+            project,
+            version,
+            author,
+            component,
+            creationDate,
+            flows,
+            line,
+            rule,
+            securityCategory,
+            status,
+            textRange,
+            vulnerabilityProbability,
+        }))
+        await operations.createSecurityHotspots({hotspots})
+    }
+}
+
 export const services = {
     createMeasures,
     createFacets,
-    createIssues
+    createIssues,
+    createSecurityHotspots
 }

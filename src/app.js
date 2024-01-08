@@ -50,6 +50,7 @@ const tasks = [
     // () => sonarqubeServices.createMeasures({project, projectKey, version}),
     // () => sonarqubeServices.createFacets({project, projectKey, version}),
     // () => sonarqubeServices.createIssues({project, projectKey, version}),
+    // () => sonarqubeServices.createSecurityHotspots({project, projectKey, version}),
 ];
 
 for (const task of tasks) {

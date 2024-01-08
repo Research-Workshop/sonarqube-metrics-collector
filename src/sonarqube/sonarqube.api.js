@@ -93,9 +93,6 @@ const getSecurityHotspots = async ({projectKey, newCode = false, page = 1, pageS
     if (newCode) {
         params.inNewCodePeriod = true
     }
-    // const res = await client.get("/hotspots/search", {params})
-    // const {paging, hotspots} = res.data
-    // return {paging, hotspots}
     return await createPaginatedStream({
         url: "/hotspots/search",
         method: "get",
@@ -132,34 +129,6 @@ const createPaginatedStream = async ({url, method, data, params}) => {
     }
 
     return new Readable.from(fetchData())
-    // const stream = new Readable({
-    //     objectMode: true,
-    //     async read() {
-    //         const response = await client.request({
-    //             url,
-    //             method,
-    //             data,
-    //             params,
-    //         })
-    //         const {paging, ...rest} = response.data
-    //         const totalPages = Math.ceil(paging.total / paging.pageSize)
-    //         this.push(rest)
-    //         for (let i = 1; i <= totalPages; i++) {
-    //             const response = await client.request({
-    //                 url,
-    //                 method,
-    //                 data,
-    //                 params: {
-    //                     ...params,
-    //                     p: i
-    //                 }
-    //             })
-    //             const {paging, ...rest} = response.data
-    //             this.push(rest)
-    //         }
-    //         this.push(null)
-    //     }
-    // })
 }
 
 export const api = {

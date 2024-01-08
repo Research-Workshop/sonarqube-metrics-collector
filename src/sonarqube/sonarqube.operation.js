@@ -22,8 +22,15 @@ async function createIssues({issues}) {
     await commitsCollection.insertMany(issues);
 }
 
+async function createSecurityHotspots({hotspots}) {
+    const db = GLOBALS.DB_CLIENT.db("metrics");
+    const commitsCollection = db.collection("hotspots");
+    await commitsCollection.insertMany(hotspots);
+}
+
 export const operations = {
     createMeasures,
     createFacetProperties,
-    createIssues
+    createIssues,
+    createSecurityHotspots
 }
