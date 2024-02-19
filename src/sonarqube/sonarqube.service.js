@@ -38,7 +38,7 @@ const createIssues = async ({project, projectKey, version}) => {
                                           textRange,
                                           type
                                       }) => ({
-            _id: key,
+            key,
             project,
             version,
             author,
@@ -77,7 +77,7 @@ const createSecurityHotspots = async ({project, projectKey, version}) => {
                                               textRange,
                                               vulnerabilityProbability,
                                           }) => ({
-            _id: key,
+            key,
             project,
             version,
             author,
