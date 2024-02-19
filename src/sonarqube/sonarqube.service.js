@@ -21,6 +21,9 @@ const createIssues = async ({project, projectKey, version}) => {
     const issuesStream = await api.getIssues({projectKey})
     for await (const data of issuesStream) {
         const {issues: issuesArr} = data
+        if (issuesArr.length === 0) {
+          continue
+        }
         const issues = issuesArr.map(({
                                           author,
                                           component,
@@ -64,6 +67,9 @@ const createSecurityHotspots = async ({project, projectKey, version}) => {
     const hotspotsStream = await api.getSecurityHotspots({projectKey})
     for await (const data of hotspotsStream) {
         const {hotspots: hotspotsArr} = data
+        if (hotspotsArr.length === 0) {
+          continue
+        }
         const hotspots = hotspotsArr.map(({
                                               author,
                                               component,
